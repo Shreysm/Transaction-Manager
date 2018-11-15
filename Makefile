@@ -1,24 +1,55 @@
-JAR=btreelib.jar
+#
+# Makefile for TX Manager project.  Needs GNU make.
+#
+# Define DEBUGFLAGS for debugging output
+#
+# Warning: make depend overwrites this file.
 
-#this is the name of the given project folder
-ASSIGNMENT=btree_project_F18
+.PHONY: depend clean backup setup
 
-#change the ASSIGN path to the path where you have downloaded
-ASSIGN=/home/s/sx/sxm9806/
+MAIN=zgt_test
 
-#change the JDKPATH if you are not using omega.uta.edu
-JDKPATH = /opt/jdk1.6.0_20
-LIBPATH = $(ASSIGN)/$(ASSIGNMENT)/lib/$(JAR)
-CLASSPATH = $(LIBPATH):$(ASSIGN)/$(ASSIGNMENT)/src
-BINPATH = $(JDKPATH)/bin
-JAVAC = $(JDKPATH)/bin/javac -classpath $(CLASSPATH)
-JAVA  = $(JDKPATH)/bin/java  -classpath $(CLASSPATH)
+# Change the following line depending on where you have copied and unzipped the files
+#solutions dir should have src, includes, and test-files directories
+#change with your path if you are not using omega.uta.edu
 
-BTTest:BTTest.java
-	$(JAVAC) BTTest.java TestDriver.java
+TXMGR=..
 
-bttest: BTTest
-	$(JAVA) tests.BTTest
+#set DIRPATH to the dir from where you use the g++ compiler, change with your path if you are not using omega.uta.edu omega.uta.edu 
+DIRPATH=/usr
+
+CC=$(DIRPATH)/bin/g++
+
+# EXAMPLE: In the next line only TX_DEBUG is enabled
+#DEBUGFLAGS =  -DTX_DEBUG # -DTM_DEBUG -DHT_DEBUG
+
+#Below, all are enabled; you can disable it as you wish
+DEBUGFLAGS = -DTX_DEBUG -DTM_DEBUG -DHT_DEBUG
+
+INCLUDES = -I${TXMGR}/include -I.
+
+LINCLUDES = -L$(DIRPATH)/lib
+
+SRCS = zgt_test.C zgt_tm.C zgt_tx.C zgt_ht.C zgt_semaphore.C
+
+OBJS = $(SRCS:.C=.o)
+
+$(MAIN):  $(OBJS) Makefile
+	 $(CC) -lpthread $(CFLAGS) $(DEBUGFLAGS) $(INCLUDES) $(OBJS) -o $(MAIN) $(LFLAGS)
+
+.C.o:
+	$(CC) $(CFLAGS) $(INCLUDES) $(LINCLUDES) $(DEBUGFLAGS) -c $<
+
+depend: $(SRCS) Makefile
+	makedepend $(INCLUDES)  $^
 
 clean:
-	\rm -f *.class *~ \#* core
+	rm -f *.o *~ $(MAIN)
+
+# Grab the sources for a user who has only the makefile
+setup:
+	/bin/cp -f $(TXMGR)/src/*.[C] .
+	/bin/cp -f $(TXMGR)/test-files/*.txt .
+	/bin/cp -f $(TXMGR)/includes/*.[h]
+
+# DO NOT DELETE THIS LINE -- make depend needs it
